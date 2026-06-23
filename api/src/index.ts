@@ -1,16 +1,15 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
-import config from './config/env.js'
+import config from './config/env.js';
 import { connectDB } from './config/db.js';
+import routes from './routes/index.js';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', uptime: process.uptime() });
-});
+app.use('/api', routes);
 
 async function start(): Promise<void> {
     try {
