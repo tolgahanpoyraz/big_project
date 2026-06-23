@@ -9,7 +9,7 @@ router.use('/health', healthRouter);
 router.use('/auth', authRouter);
 
 router.get('/protected', authenticate, (req, res) => { // TEST ENDPOINT, DELETE LATER
-    res.json({ user: req.user })
+    res.json({ jwtPayload: req.auth })
 })
 
 export default router;

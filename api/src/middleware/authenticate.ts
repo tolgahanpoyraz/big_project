@@ -11,7 +11,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 
     try {
         const payload = jwt.verify(header.slice(7), config.jwtSecret);
-        req.user = payload;
+        req.auth = payload;
         next();
     } catch {
         res.status(401).json({ error: 'Invalid or expired token' });
