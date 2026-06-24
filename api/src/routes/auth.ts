@@ -1,19 +1,10 @@
 import { Router } from 'express';
-import config from '../config/env.js'
-import jwt from 'jsonwebtoken';
+import { registerUser, loginUser, verifyEmail } from '../controllers/auth.js';
 
 const router = Router();
 
-router.post('/login', (_req, res) => { // PLACEHOLDER, CHANGE LATER
-    const payload = { user: 'test' };
-    const token = jwt.sign(payload, config.jwtSecret, {
-        expiresIn: "1h",
-    })
-    res.json({ token })
-})
-
-router.post('/register', (_req, res) => {
-    // TODO
-})
+router.post('/login', loginUser);
+router.post('/register', registerUser);
+router.get('/verify', verifyEmail);
 
 export default router;
