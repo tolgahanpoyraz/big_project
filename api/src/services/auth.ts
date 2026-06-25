@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { User } from '../models/User.js';
 import { sendVerificationEmail } from './email.js';
+import { AppError } from '../errors.js';
 
 const VERIFICATION_TTL = 1000 * 60 * 60 * 24;   // 24 hours
 
@@ -11,7 +12,7 @@ function hashToken(raw: string): string {
 export async function register(email: string, password: string) {
     const existing = await User.findOne({ email });
     if (existing) {
-        throw new Error('Email already in use');
+        throw new AppError(409, 'Email already in use');
     }
 
     const user = await User.create({ email, password })
@@ -28,16 +29,16 @@ export async function register(email: string, password: string) {
 export async function login(email: string, password: string) {
     const user = await User.findOne({ email }).select('+password')
     if (!user) {
-        throw new Error('Invalid credentials');
+        throw new AppError(401, 'Invalid credentials');
     }
 
     const ok = await user.comparePassword(password);
     if (!ok) {
-        throw new Error('Invalid credentials');
+        throw new AppError(401, 'Invalid credentials');
     }
 
     if (!user.verified) {
-        throw new Error('Email not verified');
+        throw new AppError(403, 'Email not verified');
     }
 
     return user;
@@ -48,7 +49,10 @@ export async function verifyEmailToken(rawToken: string) {
         verificationToken: hashToken(rawToken),
         verificationTokenExpires: { $gt: new Date() },
     });
-    if (!user) throw new Error('Invalid or expired verification token');
+
+    if (!user) {
+        throw new AppError(400, 'Invalid or expired verification token');
+    }
 
     user.verified = true;
     user.verificationToken = undefined;

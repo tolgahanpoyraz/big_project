@@ -12,4 +12,5 @@ router.get('/protected', authenticate, (req, res) => { // TEST ENDPOINT, DELETE 
     res.json({ jwtPayload: req.auth })
 })
 
+
 export default router;
