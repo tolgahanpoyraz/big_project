@@ -7,6 +7,8 @@ export interface IUser {
     verified?: boolean,
     verificationToken?: string,
     verificationTokenExpires?: Date,
+    resetToken?: string,
+    resetTokenExpires?: Date,
 }
 
 interface IUserMethods {
@@ -22,6 +24,8 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
         verified: { type: Boolean, default: false },
         verificationToken: { type: String, select: false },
         verificationTokenExpires: { type: Date, select: false },
+        resetToken: { type: String, select: false },
+        resetTokenExpires: { type: Date, select: false },
     }
 )
 

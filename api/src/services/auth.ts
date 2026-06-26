@@ -1,12 +1,30 @@
 import crypto from 'crypto';
-import { User } from '../models/User.js';
-import { sendVerificationEmail } from './email.js';
+import { type HydratedDocument } from 'mongoose';
+import { User, type IUser } from '../models/User.js';
+import { sendVerificationEmail, sendPasswordResetEmail } from './email.js';
 import { AppError } from '../errors.js';
 
 const VERIFICATION_TTL = 1000 * 60 * 60 * 24;   // 24 hours
+const RESET_TTL = 1000 * 60 * 60;               // 1 hour 
 
 function hashToken(raw: string): string {
     return crypto.createHash('sha256').update(raw).digest('hex')
+}
+
+async function issueVerificationToken(user: HydratedDocument<IUser>): Promise<void> {
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = hashToken(rawToken);
+    user.verificationTokenExpires = new Date(Date.now() + VERIFICATION_TTL);
+    await user.save();
+    await sendVerificationEmail(user.email, rawToken);
+}
+
+async function issuePasswordResetToken(user: HydratedDocument<IUser>): Promise<void> {
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    user.resetToken = hashToken(rawToken);
+    user.resetTokenExpires = new Date(Date.now() + RESET_TTL);
+    await user.save();
+    await sendPasswordResetEmail(user.email, rawToken);
 }
 
 export async function register(email: string, password: string) {
@@ -17,13 +35,16 @@ export async function register(email: string, password: string) {
 
     const user = await User.create({ email, password })
 
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    user.verificationToken = hashToken(rawToken);
-    user.verificationTokenExpires = new Date(Date.now() + VERIFICATION_TTL);
-    await user.save();
-
-    await sendVerificationEmail(user.email, rawToken);
+    await issueVerificationToken(user);
     return user;
+}
+
+export async function resendVerification(email: string): Promise<void> {
+    const user = await User.findOne({ email });
+
+    if (user && !user.verified) {
+        await issueVerificationToken(user);
+    }
 }
 
 export async function login(email: string, password: string) {
@@ -61,10 +82,48 @@ export async function verifyEmailToken(rawToken: string) {
     return user;
 }
 
+export async function resetPassword(rawToken: string, newPassword: string): Promise<void> {
+    const user = await User.findOne({
+        resetToken: hashToken(rawToken),
+        resetTokenExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+        throw new AppError(400, 'Invalid or expired reset token');
+    }
+
+    user.password = newPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpires = undefined;
+    await user.save();
+}
+
+export async function changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+        throw new AppError(404, 'User not found');
+    }
+
+    const ok = await user.comparePassword(currentPassword);
+    if (!ok) {
+        throw new AppError(401, 'Current password is incorrect');
+    }
+
+    user.password = newPassword;
+    await user.save();
+}
+
 export async function getUserById(id: string) {
     const user = await User.findById(id);
     if (!user) {
         throw new AppError(404, 'User not found');
     }
     return user;
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+    const user = await User.findOne({ email });
+    if (user) {
+        await issuePasswordResetToken(user);
+    }
 }

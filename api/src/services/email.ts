@@ -14,3 +14,15 @@ export async function sendVerificationEmail(to: string, rawToken: string): Promi
         html: `<p><a href="${link}">Verify</a></p>`
     })
 }
+
+export async function sendPasswordResetEmail(to: string, rawToken: string): Promise<void> {
+    const link = `${config.appUrl}/reset-password?token=${rawToken}`;   // needs frontend page
+
+    await sgMail.send({
+        to,
+        from: config.sendgridFromEmail,
+        subject: 'Reset your password',
+        text: `Reset your password: ${link}`,
+        html: `<p><a href="${link}">Reset your password</a></p>`
+    })
+}
