@@ -1,7 +1,9 @@
 import { type Request, type Response } from 'express';
 import { type JwtPayload } from 'jsonwebtoken';
 import * as postService from '../services/posts.js';
+import { type VoteType } from '../models/Post.js';
 import { requireFields } from '../middleware/errorHandler.js';
+import { AppError } from '../errors.js';
 
 export async function createPost(req: Request, res: Response): Promise<void> {
     const { id } = req.auth as JwtPayload;
@@ -22,4 +24,17 @@ export async function createPost(req: Request, res: Response): Promise<void> {
 export async function getFeed(_req: Request, res: Response): Promise<void> {
     const posts = await postService.listFeed();
     res.status(200).json({ posts });
+}
+
+export async function votePost(req: Request, res: Response): Promise<void> {
+    const { id: userId } = req.auth as JwtPayload;
+    const { id: postId } = req.params as { id: string };
+    const { type } = req.body as { type?: VoteType };
+    requireFields({ type }, ['type']);
+    if (type !== 'present' && type !== 'gone') {
+        throw new AppError(400, "type must be 'present' or 'gone'");
+    }
+
+    const result = await postService.vote(postId, userId, type);
+    res.status(200).json(result);
 }
