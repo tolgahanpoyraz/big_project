@@ -17,6 +17,7 @@ export interface IPost {
     badges: string[];
     author: Types.ObjectId;
     confidence: number;
+    lastUpdate: Date;
     tallies: { present: number; gone: number };
     status: PostStatus;
     votes: IVote[];
@@ -41,6 +42,7 @@ const postSchema = new Schema<IPost, PostModel>(
         badges: { type: [String], default: [] },
         author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         confidence: { type: Number, default: PRIOR },
+        lastUpdate: { type: Date, default: Date.now },
         tallies: {
             present: { type: Number, default: 0 },
             gone: { type: Number, default: 0 },

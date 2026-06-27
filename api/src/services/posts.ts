@@ -1,5 +1,5 @@
 import { Post, type IPost, type VoteType } from '../models/Post.js';
-import { updateConfidence, statusFromConfidence } from '../confidence.js';
+import { updateConfidence, decayConfidence, statusFromConfidence } from '../confidence.js';
 import { AppError } from '../errors.js';
 
 type NewPost = Pick<IPost, 'foodName' | 'location' | 'badges' | 'imageKey'>;
@@ -9,10 +9,20 @@ export async function createPost(authorId: string, data: NewPost) {
 }
 
 export async function listFeed() {
-    return Post.find().sort({ createdAt: -1 });
+    const now = Date.now();
+    const posts = await Post.find().lean();
+    return posts
+        .map((post) => {
+            const minutes = (now - new Date(post.lastUpdate).getTime()) / 60000;
+            const confidence = decayConfidence(post.confidence, minutes);
+            return { ...post, confidence, status: statusFromConfidence(confidence) };
+        })
+        .filter((post) => post.status !== 'gone')
+        .sort((a, b) => b.confidence - a.confidence);
 }
 
 export async function vote(postId: string, userId: string, type: VoteType) {
+    const now = new Date();
     const post = await Post.findById(postId).select('+votes');
 
     if (!post) {
@@ -23,7 +33,9 @@ export async function vote(postId: string, userId: string, type: VoteType) {
         throw new AppError(409, 'You have already voted on this post');
     }
 
-    const confidence = updateConfidence(post.confidence, type);
+    const minutes = (now.getTime() - post.lastUpdate.getTime()) / 60000;
+    const decayed = decayConfidence(post.confidence, minutes);
+    const confidence = updateConfidence(decayed, type);
     const status = statusFromConfidence(confidence);
     const tallies = {
         present: post.tallies.present + (type === 'present' ? 1 : 0),
@@ -33,9 +45,9 @@ export async function vote(postId: string, userId: string, type: VoteType) {
     const res = await Post.updateOne(
         { _id: postId, 'votes.user': { $ne: userId } },
         {
-            $push: { votes: { user: userId, type, at: new Date() } },
+            $push: { votes: { user: userId, type, at: now } },
             $inc: { [`tallies.${type}`]: 1 },
-            $set: { confidence, status },
+            $set: { confidence, status, lastUpdate: now },
         },
     );
     if (res.matchedCount === 0) {
