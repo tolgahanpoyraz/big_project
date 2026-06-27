@@ -1,4 +1,5 @@
 import { Schema, model, Types, type Model } from 'mongoose';
+import { PRIOR } from '../confidence.js';
 
 export type VoteType = 'present' | 'gone';
 export type PostStatus = 'fresh' | 'likely' | 'fading' | 'gone';
@@ -15,6 +16,7 @@ export interface IPost {
     imageKey?: string;
     badges: string[];
     author: Types.ObjectId;
+    confidence: number;
     tallies: { present: number; gone: number };
     status: PostStatus;
     votes: IVote[];
@@ -38,6 +40,7 @@ const postSchema = new Schema<IPost, PostModel>(
         imageKey: { type: String },
         badges: { type: [String], default: [] },
         author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        confidence: { type: Number, default: PRIOR },
         tallies: {
             present: { type: Number, default: 0 },
             gone: { type: Number, default: 0 },
