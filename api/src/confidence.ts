@@ -1,25 +1,22 @@
 import { type VoteType, type PostStatus } from './models/Post.js';
 
-export const PRIOR = 0.88;
+export const E_INITIAL = 2.0;   
+const E_PRIOR = -2.5;            // log-odds decays toward this
+const LAMBDA = Math.LN2 / 20;    // 20-minute half-life
 
-const DECAY_FLOOR = 0.10;
-const LAMBDA = Math.LN2 / 20;   // 20 minute half-life
-
-// P(this vote | food is present), P(this vote | food is gone).
-const LIKELIHOOD: Record<VoteType, { present: number; gone: number }> = {
-    present: { present: 0.8, gone: 0.3 },
-    gone: { present: 0.2, gone: 0.7 },
+const VOTE_WEIGHT: Record<VoteType, number> = {
+    present: 1.5,
+    gone: -3.0,
 };
 
-export function updateConfidence(p: number, type: VoteType): number {
-    const L = LIKELIHOOD[type];
-    const stillThere = L.present * p;   // P(vote | food is present) * P(present)
-    const isGone = L.gone * (1 - p);    // P(vote | food is gone) * P(gone)
-    return stillThere / (stillThere + isGone);  // stillThere + isGone = P(vote)
+export const sigmoid = (E: number): number => 1 / (1 + Math.exp(-E));
+
+export function applyVote(E: number, type: VoteType): number {
+    return E + VOTE_WEIGHT[type];
 }
 
-export function decayConfidence(p: number, minutesElapsed: number): number {
-    return DECAY_FLOOR + (p - DECAY_FLOOR) * Math.exp(-LAMBDA * minutesElapsed);
+export function decayE(E: number, minutesElapsed: number): number {
+    return E_PRIOR + (E - E_PRIOR) * Math.exp(-LAMBDA * minutesElapsed);
 }
 
 export function statusFromConfidence(p: number): PostStatus {

@@ -1,5 +1,5 @@
 import { Post, type IPost, type VoteType } from '../models/Post.js';
-import { updateConfidence, decayConfidence, statusFromConfidence } from '../confidence.js';
+import { applyVote, decayE, sigmoid, statusFromConfidence } from '../confidence.js';
 import { AppError } from '../errors.js';
 
 type NewPost = Pick<IPost, 'foodName' | 'location' | 'badges' | 'imageKey'>;
@@ -14,7 +14,7 @@ export async function listFeed() {
     return posts
         .map((post) => {
             const minutes = (now - new Date(post.lastUpdate).getTime()) / 60000;
-            const confidence = decayConfidence(post.confidence, minutes);
+            const confidence = sigmoid(decayE(post.E, minutes));
             return { ...post, confidence, status: statusFromConfidence(confidence) };
         })
         .filter((post) => post.status !== 'gone')
@@ -34,8 +34,8 @@ export async function vote(postId: string, userId: string, type: VoteType) {
     }
 
     const minutes = (now.getTime() - post.lastUpdate.getTime()) / 60000;
-    const decayed = decayConfidence(post.confidence, minutes);
-    const confidence = updateConfidence(decayed, type);
+    const E = applyVote(decayE(post.E, minutes), type);
+    const confidence = sigmoid(E);
     const status = statusFromConfidence(confidence);
     const tallies = {
         present: post.tallies.present + (type === 'present' ? 1 : 0),
@@ -47,7 +47,7 @@ export async function vote(postId: string, userId: string, type: VoteType) {
         {
             $push: { votes: { user: userId, type, at: now } },
             $inc: { [`tallies.${type}`]: 1 },
-            $set: { confidence, status, lastUpdate: now },
+            $set: { E, status, lastUpdate: now },
         },
     );
     if (res.matchedCount === 0) {
