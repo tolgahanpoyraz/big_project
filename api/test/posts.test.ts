@@ -66,6 +66,20 @@ describe('POST /api/posts', () => {
         expect(res.status).toBe(400);
         expect(res.body.error).toMatch(/location/i);
     });
+
+    it('rejects a whitespace-only foodName with 400', async () => {
+        const token = await authUser();
+        const res = await createPost(token, { foodName: '   ' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/foodName/i);
+    });
+
+    it('rejects a malformed imageKey with 400', async () => {
+        const token = await authUser();
+        const res = await createPost(token, { imageKey: 'not-a-valid-key' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/imageKey/i);
+    });
 });
 
 describe('GET /api/posts', () => {
@@ -150,6 +164,12 @@ describe('POST /api/posts/:id/vote', () => {
         const token = await authUser();
         const { body } = await createPost(token);
         const res = await vote(token, body.post._id, 'maybe');
+        expect(res.status).toBe(400);
+    });
+
+    it('returns 400 for a malformed post id', async () => {
+        const token = await authUser();
+        const res = await vote(token, 'not-a-valid-id', 'present');
         expect(res.status).toBe(400);
     });
 
