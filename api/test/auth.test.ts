@@ -18,7 +18,12 @@ const PASSWORD = 'hunter2pw';
 const NEW_PASSWORD = 'newpass123';
 
 function register(email = EMAIL, password = PASSWORD) {
-    return request(app).post('/api/auth/register').send({ email, password });
+    return request(app).post('/api/auth/register').send({
+        firstName: 'Test',
+        lastName: 'User',
+        email,
+        password,
+    });
 }
 
 function login(email = EMAIL, password = PASSWORD) {
@@ -56,6 +61,8 @@ describe('POST /api/auth/register', () => {
         expect(res.status).toBe(201);
         const user = await User.findOne({ email: EMAIL });
         expect(user?.verified).toBe(false);
+        expect(user?.firstName).toBe('Test');
+        expect(user?.lastName).toBe('User');
         expect(mockedVerifyEmail).toHaveBeenCalledOnce();
         expect(mockedVerifyEmail.mock.calls[0][0]).toBe(EMAIL);
     });
@@ -70,7 +77,7 @@ describe('POST /api/auth/register', () => {
     it('returns 400 when a field is missing', async () => {
         const res = await request(app).post('/api/auth/register').send({ email: EMAIL });
         expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/password/i);
+        expect(res.body.error).toMatch(/password|firstName|lastName/i);
     });
 
     it('rejects a password shorter than 8 characters with 400', async () => {
@@ -99,7 +106,11 @@ describe('POST /api/auth/login', () => {
         const res = await login();
         expect(res.status).toBe(200);
         expect(res.body.token).toBeTruthy();
-        expect(res.body.user).toMatchObject({ email: EMAIL });
+        expect(res.body.user).toMatchObject({
+            email: EMAIL,
+            firstName: 'Test',
+            lastName: 'User',
+        });
     });
 
     it('returns 401 on wrong password', async () => {
@@ -235,7 +246,12 @@ describe('GET /api/auth/me', () => {
         const { token } = await registerVerifyLogin();
         const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
         expect(res.status).toBe(200);
-        expect(res.body.user).toMatchObject({ email: EMAIL, verified: true });
+        expect(res.body.user).toMatchObject({
+            email: EMAIL,
+            verified: true,
+            firstName: 'Test',
+            lastName: 'User',
+        });
     });
 
     it('returns 401 without a token', async () => {
