@@ -12,6 +12,7 @@ vi.mock('../src/services/uploads.js', () => ({
 
 import app from '../src/app.js';
 import { Post } from '../src/models/Post.js';
+import { Vote } from '../src/models/Vote.js';
 import { sendVerificationEmail } from '../src/services/email.js';
 
 const mockedVerifyEmail = vi.mocked(sendVerificationEmail);
@@ -151,7 +152,7 @@ describe('POST /api/posts/:id/vote', () => {
         const { body } = await createPost(author);
         await vote(author, body.post._id, 'present').expect(200);
         await vote(other, body.post._id, 'gone').expect(200);
-        expect((await Post.findById(body.post._id).select('+votes'))?.votes).toHaveLength(2);
+        expect(await Vote.countDocuments({ post: body.post._id })).toBe(2);
     });
 
     it('returns 404 for a nonexistent post', async () => {
