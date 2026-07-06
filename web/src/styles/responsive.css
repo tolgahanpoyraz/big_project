@@ -1,0 +1,75 @@
+/* Below tablet: brand panels drop away, feed rail + map + detail restack.
+   Mirrors the mobile app per the handoff. */
+
+@media (max-width: 1024px) {
+  .brand-panel {
+    display: none;
+  }
+  .auth-form-side {
+    flex: 1;
+  }
+}
+
+/* Tablet and below: the map column narrows; detail becomes a right sheet */
+@media (max-width: 900px) {
+  .detail {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: min(380px, 100%);
+    z-index: 40;
+    box-shadow: -20px 0 50px -24px rgba(58, 26, 18, 0.4);
+    animation: cwFadeIn 0.16s ease;
+  }
+}
+
+/* Phone: feed rail becomes the full first pane, map hides behind a toggle.
+   The feed rail expands to fill; the map + detail overlay when a post is open. */
+@media (max-width: 680px) {
+  .feed-rail {
+    width: 100%;
+    border-right: none;
+  }
+  .map-detail {
+    display: none;
+  }
+  .app-body.has-selection .feed-rail {
+    display: none;
+  }
+  .app-body.has-selection .map-detail {
+    display: flex;
+    width: 100%;
+  }
+  .detail {
+    width: 100%;
+    top: 0;
+  }
+  .post-modal {
+    flex-direction: column;
+    width: 100%;
+  }
+  .post-photo-side {
+    width: 100%;
+    min-height: 160px;
+  }
+  .post-photo-side .post-photo-hint {
+    display: none;
+  }
+  .settings-modal {
+    flex-direction: column;
+    height: auto;
+    width: 100%;
+  }
+  .settings-nav {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-nav .t {
+    display: none;
+  }
+}
