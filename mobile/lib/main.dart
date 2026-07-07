@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'features/posts/feed_page.dart';
+import 'app_shell.dart';
 
 void main() {
   runApp(const CampusFoodApp());
@@ -20,7 +20,7 @@ class CampusFoodApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const FeedPage(),
+      home: const AppShell(),
     );
   }
 }
