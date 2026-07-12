@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../api/posts_api.dart';
 import '../auth/auth_session.dart';
@@ -21,13 +24,18 @@ class CreatePostPage extends StatefulWidget {
 
 class _CreatePostPageState extends State<CreatePostPage> {
   final _formKey = GlobalKey<FormState>();
+
   final _foodNameController = TextEditingController();
   final _locationController = TextEditingController();
   final _badgesController = TextEditingController();
 
+  final ImagePicker _imagePicker = ImagePicker();
+
+  XFile? _selectedImage;
+  Uint8List? _selectedImageBytes;
+
   bool _isSubmitting = false;
   String? _error;
-  String? _message;
 
   @override
   void dispose() {
@@ -43,6 +51,65 @@ class _CreatePostPageState extends State<CreatePostPage> {
         .map((badge) => badge.trim())
         .where((badge) => badge.isNotEmpty)
         .toList();
+  }
+
+  String _getImageContentType(XFile image) {
+    if (image.mimeType != null && image.mimeType!.isNotEmpty) {
+      return image.mimeType!;
+    }
+
+    final lowerPath = image.path.toLowerCase();
+
+    if (lowerPath.endsWith('.png')) {
+      return 'image/png';
+    }
+
+    if (lowerPath.endsWith('.webp')) {
+      return 'image/webp';
+    }
+
+    if (lowerPath.endsWith('.heic') || lowerPath.endsWith('.heif')) {
+      return 'image/heic';
+    }
+
+    return 'image/jpeg';
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 75,
+        maxWidth: 1400,
+      );
+
+      if (image == null) {
+        return;
+      }
+
+      final bytes = await image.readAsBytes();
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedImage = image;
+        _selectedImageBytes = bytes;
+        _error = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _error = 'Could not select the photo.';
+      });
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+      _selectedImageBytes = null;
+    });
   }
 
   Future<void> _submitPost() async {
@@ -65,33 +132,50 @@ class _CreatePostPageState extends State<CreatePostPage> {
     setState(() {
       _isSubmitting = true;
       _error = null;
-      _message = null;
     });
 
     try {
+      String? imageKey;
+
+      if (_selectedImage != null && _selectedImageBytes != null) {
+        imageKey = await PostsApi.uploadImageBytes(
+          token: token,
+          bytes: _selectedImageBytes!,
+          contentType: _getImageContentType(_selectedImage!),
+        );
+      }
+
       await PostsApi.createPost(
         token: token,
         foodName: _foodNameController.text,
         location: _locationController.text,
         badges: _parseBadges(_badgesController.text),
+        imageKey: imageKey,
       );
 
       _foodNameController.clear();
       _locationController.clear();
       _badgesController.clear();
 
+      if (!mounted) return;
+
       setState(() {
-        _message = 'Food post created.';
+        _selectedImage = null;
+        _selectedImageBytes = null;
       });
 
       widget.onPostCreated();
     } on PostsApiException catch (error) {
+      if (!mounted) return;
+
       setState(() {
         _error = error.message;
       });
     } catch (_) {
+      if (!mounted) return;
+
       setState(() {
-        _error = 'Could not create post. Please try again.';
+        _error = 'Could not create the food post. Please try again.';
       });
     } finally {
       if (mounted) {
@@ -115,7 +199,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.lock_outline, size: 48),
+                const Icon(
+                  Icons.lock_outline,
+                  size: 48,
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Log in to create a post',
@@ -196,8 +283,33 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   helperText: 'Separate badges with commas',
                   border: OutlineInputBorder(),
                 ),
-                onFieldSubmitted: (_) => _submitPost(),
               ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _isSubmitting ? null : _pickImage,
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: Text(
+                  _selectedImage == null ? 'Add photo' : 'Change photo',
+                ),
+              ),
+              if (_selectedImageBytes != null) ...[
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    _selectedImageBytes!,
+                    height: 220,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextButton.icon(
+                  onPressed: _isSubmitting ? null : _removeImage,
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Remove photo'),
+                ),
+              ],
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _isSubmitting ? null : _submitPost,
@@ -205,24 +317,20 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
                       )
                     : const Icon(Icons.add),
-                label: Text(_isSubmitting ? 'Posting...' : 'Post food'),
-              ),
-              if (_message != null) ...[
-                const SizedBox(height: 16),
-                Text(
-                  _message!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                label: Text(
+                  _isSubmitting ? 'Posting...' : 'Post food',
                 ),
-              ],
+              ),
               if (_error != null) ...[
                 const SizedBox(height: 16),
                 Text(
                   _error!,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.error,
                   ),

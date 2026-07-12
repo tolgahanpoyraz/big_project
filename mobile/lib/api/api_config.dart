@@ -9,5 +9,5 @@ class ApiConfig {
   // static const String baseUrl = 'http://192.168.x.x:5001/api';
 
   static const String imageBaseUrl =
-      'https://free-food-uploads-379604374199.s3.us-east-1.amazonaws.com/';
+      'https://free-food-uploads-379604374199.s3.us-east-1.amazonaws.com';
 }

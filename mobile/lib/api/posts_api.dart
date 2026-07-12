@@ -25,7 +25,6 @@ class PostsApi {
     );
 
     final data = _decodeResponse(response);
-
     final postsJson = data['posts'] as List<dynamic>? ?? [];
 
     return postsJson
@@ -38,18 +37,25 @@ class PostsApi {
     required String foodName,
     required String location,
     required List<String> badges,
+    String? imageKey,
   }) async {
+    final body = <String, dynamic>{
+      'foodName': foodName.trim(),
+      'location': location.trim(),
+      'badges': badges,
+    };
+
+    if (imageKey != null && imageKey.isNotEmpty) {
+      body['imageKey'] = imageKey;
+    }
+
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/posts'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({
-        'foodName': foodName.trim(),
-        'location': location.trim(),
-        'badges': badges,
-      }),
+      body: jsonEncode(body),
     );
 
     final data = _decodeResponse(response);
@@ -75,6 +81,53 @@ class PostsApi {
     );
 
     _decodeResponse(response);
+  }
+
+  static Future<Map<String, String>> getUploadUrl({
+    required String token,
+  }) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/posts/upload-url'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final data = _decodeResponse(response);
+
+    return {
+      'url': data['url'].toString(),
+      'key': data['key'].toString(),
+    };
+  }
+
+  static Future<String> uploadImageBytes({
+    required String token,
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    final uploadData = await getUploadUrl(token: token);
+
+    final uploadUrl = uploadData['url']!;
+    final imageKey = uploadData['key']!;
+
+    final uploadResponse = await http.put(
+      Uri.parse(uploadUrl),
+      headers: {
+        'Content-Type': contentType,
+      },
+      body: bytes,
+    );
+
+    if (uploadResponse.statusCode < 200 || uploadResponse.statusCode >= 300) {
+      throw PostsApiException(
+        'Image upload failed',
+        statusCode: uploadResponse.statusCode,
+      );
+    }
+
+    return imageKey;
   }
 
   static Map<String, dynamic> _decodeResponse(http.Response response) {
