@@ -75,10 +75,53 @@ class _CreatePostPageState extends State<CreatePostPage> {
     return 'image/jpeg';
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _showPhotoOptions() async {
+    if (_isSubmitting) {
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: const Text('Take photo'),
+                subtitle: const Text('Use your device camera'),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Choose from library'),
+                subtitle: const Text('Select an existing photo'),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.close),
+                title: const Text('Cancel'),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
     try {
       final image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 75,
         maxWidth: 1400,
       );
@@ -100,7 +143,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
       if (!mounted) return;
 
       setState(() {
-        _error = 'Could not select the photo.';
+        _error = source == ImageSource.camera
+            ? 'Could not take the photo.'
+            : 'Could not select the photo.';
       });
     }
   }
@@ -109,6 +154,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     setState(() {
       _selectedImage = null;
       _selectedImageBytes = null;
+      _error = null;
     });
   }
 
@@ -286,7 +332,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
-                onPressed: _isSubmitting ? null : _pickImage,
+                onPressed: _isSubmitting ? null : _showPhotoOptions,
                 icon: const Icon(Icons.add_photo_alternate_outlined),
                 label: Text(
                   _selectedImage == null ? 'Add photo' : 'Change photo',
