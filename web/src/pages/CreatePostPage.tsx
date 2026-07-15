@@ -1,21 +1,40 @@
 /* web/src/pages/CreatePostPage.tsx */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postService } from '../api/posts.js';
+import { locationService } from '../api/locations.js';
+import { POST_TYPES } from '../api/types.js';
+import type { PostType, PostLocation } from '../api/types.js';
 
 export const CreatePostPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [foodName, setFoodName] = useState('');
+  const [type, setType] = useState<PostType | ''>('');
   const [location, setLocation] = useState('');
+  const [locations, setLocations] = useState<PostLocation[]>([]);
   const [badgeInput, setBadgeInput] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+
+  // Load the valid campus location list once, so location is a real dropdown
+  // instead of free text (the backend only accepts a fixed set of IDs).
+  useEffect(() => {
+    async function loadLocations() {
+      try {
+        const data = await locationService.getLocations();
+        setLocations(data.locations);
+      } catch (err) {
+        console.error('Failed to load locations:', err);
+      }
+    }
+    loadLocations();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,8 +50,8 @@ export const CreatePostPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!foodName || !location) {
-      setError('Food Name and Location are required fields.');
+    if (!foodName || !type || !location) {
+      setError('Food Name, Type, and Location are required fields.');
       return;
     }
 
@@ -40,11 +59,13 @@ export const CreatePostPage: React.FC = () => {
     setLoading(true);
     setUploadStatus(null);
 
-    // Parse comma-separated badges into an array
-    const badges = badgeInput
+    // Parse comma-separated tags into an array. The backend only accepts a
+    // fixed set of dietary tags, so anything else will 400 - that's fine,
+    // the backend error message will explain it.
+    const dietaryTags = badgeInput
       .split(',')
       .map(tag => tag.trim().toLowerCase())
-      .filter(tag => tag.length > 0);
+      .filter(tag => tag.length > 0) as any;
 
     try {
       let imageKey: string | undefined = undefined;
@@ -63,7 +84,7 @@ export const CreatePostPage: React.FC = () => {
           setUploadStatus('Upload complete!');
         } catch (uploadErr: any) {
           console.error('S3 Upload failed:', uploadErr);
-          
+
           if (uploadErr.status === 503 || uploadErr.message?.includes('configured')) {
             // S3 not set up on backend (503 response)
             const proceedWithoutImage = window.confirm(
@@ -92,23 +113,16 @@ export const CreatePostPage: React.FC = () => {
       // 3. Create the post
       await postService.createPost({
         foodName,
+        type,
+        dietaryTags,
         location,
-        badges,
         imageKey,
       });
 
       navigate('/');
     } catch (err: any) {
       console.error('Post creation failed:', err);
-      // Fallback behavior if API is down
-      if (err.message?.includes('failed to fetch') || err.status === undefined) {
-        setUploadStatus('Simulating post creation offline...');
-        // Wait 1s and mock redirect
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        navigate('/');
-      } else {
-        setError(err.message || 'Failed to create food post. Please verify fields.');
-      }
+      setError(err.message || 'Failed to create food post. Please verify fields.');
     } finally {
       setLoading(false);
     }
@@ -151,16 +165,35 @@ export const CreatePostPage: React.FC = () => {
           </div>
 
           <div style={formGroupStyle}>
-            <label style={labelStyle}>Where is it located?</label>
-            <input
-              type="text"
+            <label style={labelStyle}>What kind of food?</label>
+            <select
               className="glass-input"
-              placeholder="e.g. HEC Room 101"
+              value={type}
+              onChange={(e) => setType(e.target.value as PostType)}
+              disabled={loading}
+              required
+            >
+              <option value="" disabled>Select a category</option>
+              {POST_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={formGroupStyle}>
+            <label style={labelStyle}>Where is it located?</label>
+            <select
+              className="glass-input"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               disabled={loading}
               required
-            />
+            >
+              <option value="" disabled>Select a location</option>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>{loc.name}</option>
+              ))}
+            </select>
           </div>
 
           <div style={formGroupStyle}>
@@ -168,7 +201,7 @@ export const CreatePostPage: React.FC = () => {
             <input
               type="text"
               className="glass-input"
-              placeholder="e.g. pizza, spicy, vegetarian, catering"
+              placeholder="e.g. vegetarian, halal, vegan"
               value={badgeInput}
               onChange={(e) => setBadgeInput(e.target.value)}
               disabled={loading}

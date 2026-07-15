@@ -7,7 +7,8 @@ import { authService } from '../api/auth.js';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
-  
+
+  const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,7 +19,7 @@ export const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!displayName || !email || !password || !confirmPassword) {
       setError('Please fill in all fields.');
       return;
     }
@@ -28,8 +29,8 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return;
     }
 
@@ -37,7 +38,7 @@ export const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await register(email, password);
+      await register(displayName, email, password);
       // Backend registers user as unverified and sends verification email
       setRegisteredEmail(email);
     } catch (err: any) {
@@ -114,6 +115,19 @@ export const RegisterPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} style={formStyle}>
           <div style={formGroupStyle}>
+            <label style={labelStyle}>Display Name</label>
+            <input
+              type="text"
+              className="glass-input"
+              placeholder="e.g. Knightro"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+
+          <div style={formGroupStyle}>
             <label style={labelStyle}>University Email</label>
             <input
               type="email"
@@ -131,7 +145,7 @@ export const RegisterPage: React.FC = () => {
             <input
               type="password"
               className="glass-input"
-              placeholder="Min. 6 characters"
+              placeholder="Min. 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
