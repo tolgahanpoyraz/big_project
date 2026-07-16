@@ -1,6 +1,6 @@
 class ApiConfig {
   // iOS simulator / Flutter web:
-  static const String baseUrl = 'http://localhost:5001/api';
+  static const String baseUrl = 'http://162.243.165.45:5000/api';
 
   // Android emulator uses this instead:
   // static const String baseUrl = 'http://10.0.2.2:5001/api';

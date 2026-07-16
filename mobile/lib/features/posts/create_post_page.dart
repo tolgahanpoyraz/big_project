@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../api/posts_api.dart';
@@ -61,6 +62,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   bool _isLoadingLocations = true;
   bool _isSubmitting = false;
+  bool _isPickingImage = false;
 
   String? _locationsError;
   String? _error;
@@ -110,7 +112,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
         _isLoadingLocations = false;
         _locationsError = error.message;
       });
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Could not load campus locations: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
       if (!mounted) return;
 
       setState(() {
@@ -135,7 +140,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return 'image/webp';
     }
 
-    if (lowerPath.endsWith('.heic') || lowerPath.endsWith('.heif')) {
+    if (lowerPath.endsWith('.heic') ||
+        lowerPath.endsWith('.heif')) {
       return 'image/heic';
     }
 
@@ -143,55 +149,85 @@ class _CreatePostPageState extends State<CreatePostPage> {
   }
 
   Future<void> _showPhotoOptions() async {
-    if (_isSubmitting) {
+    if (_isSubmitting || _isPickingImage) {
       return;
     }
 
-    await showModalBottomSheet<void>(
+    final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useSafeArea: true,
       builder: (bottomSheetContext) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt_outlined),
-                title: const Text('Take photo'),
-                subtitle: const Text('Use your device camera'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Choose from library'),
-                subtitle: const Text('Select an existing photo'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                },
-              ),
-            ],
-          ),
+        return Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Take photo'),
+              subtitle: const Text('Use your device camera'),
+              onTap: () {
+                Navigator.pop(
+                  bottomSheetContext,
+                  ImageSource.camera,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choose from library'),
+              subtitle: const Text('Select an existing photo'),
+              onTap: () {
+                Navigator.pop(
+                  bottomSheetContext,
+                  ImageSource.gallery,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Cancel'),
+              onTap: () {
+                Navigator.pop(bottomSheetContext);
+              },
+            ),
+          ],
         );
       },
     );
+
+    if (!mounted || source == null) {
+      return;
+    }
+
+    // Give iOS time to finish dismissing the bottom sheet before
+    // presenting the native camera or photo picker.
+    await Future<void>.delayed(
+      const Duration(milliseconds: 250),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    await _pickImage(source);
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    if (_isPickingImage) {
+      return;
+    }
+
+    _isPickingImage = true;
+
     try {
+      debugPrint('Opening image picker with source: $source');
+
       final image = await _imagePicker.pickImage(
         source: source,
+        preferredCameraDevice: CameraDevice.rear,
         imageQuality: 75,
         maxWidth: 1400,
       );
+
+      debugPrint('Image picker returned: ${image?.path}');
 
       if (image == null) {
         return;
@@ -206,14 +242,59 @@ class _CreatePostPageState extends State<CreatePostPage> {
         _selectedImageBytes = bytes;
         _error = null;
       });
-    } catch (_) {
+    } on PlatformException catch (error, stackTrace) {
+      debugPrint(
+        'Image picker PlatformException: '
+        '${error.code} - ${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      String message;
+
+      switch (error.code) {
+        case 'camera_access_denied':
+        case 'camera_access_denied_without_prompt':
+        case 'camera_access_restricted':
+          message =
+              'Camera access is disabled. Enable camera access for this app in iPhone Settings.';
+          break;
+
+        case 'photo_access_denied':
+          message =
+              'Photo library access is disabled. Enable photo access for this app in iPhone Settings.';
+          break;
+
+        case 'already_active':
+          message =
+              'The camera or photo picker is already opening. Close it and try again.';
+          break;
+
+        default:
+          message = source == ImageSource.camera
+              ? 'Could not open the camera: '
+                  '${error.message ?? error.code}'
+              : 'Could not open the photo library: '
+                  '${error.message ?? error.code}';
+      }
+
+      setState(() {
+        _error = message;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Unexpected image picker error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
       if (!mounted) return;
 
       setState(() {
         _error = source == ImageSource.camera
-            ? 'Could not take the photo.'
+            ? 'Could not open the camera.'
             : 'Could not select the photo.';
       });
+    } finally {
+      _isPickingImage = false;
     }
   }
 
@@ -270,7 +351,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
     try {
       String? imageKey;
 
-      if (_selectedImage != null && _selectedImageBytes != null) {
+      if (_selectedImage != null &&
+          _selectedImageBytes != null) {
         imageKey = await PostsApi.uploadImageBytes(
           token: token,
           bytes: _selectedImageBytes!,
@@ -309,11 +391,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
       setState(() {
         _error = error.message;
       });
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Could not create food post: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
       if (!mounted) return;
 
       setState(() {
-        _error = 'Could not create the food post. Please try again.';
+        _error =
+            'Could not create the food post. Please try again.';
       });
     } finally {
       if (mounted) {
@@ -424,13 +510,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 _PhotoAction(
                   tooltip: 'Change photo',
                   icon: Icons.edit_outlined,
-                  onPressed: _isSubmitting ? null : _showPhotoOptions,
+                  onPressed:
+                      _isSubmitting ? null : _showPhotoOptions,
                 ),
                 const SizedBox(width: 8),
                 _PhotoAction(
                   tooltip: 'Remove photo',
                   icon: Icons.delete_outline_rounded,
-                  onPressed: _isSubmitting ? null : _removeImage,
+                  onPressed:
+                      _isSubmitting ? null : _removeImage,
                 ),
               ],
             ),
@@ -520,13 +608,16 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   Text(
                     'Log in to share food',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style:
+                        Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     'You can browse without an account, but you need to log in before posting.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.cocoaMuted),
+                    style: TextStyle(
+                      color: AppColors.cocoaMuted,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
@@ -570,7 +661,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   hintText: 'e.g. Leftover pizza — 6 boxes',
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return 'Food name is required';
                   }
 
@@ -586,12 +678,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 children: _foodTypes.entries.map((entry) {
                   return ChoiceChip(
                     label: Text(entry.value),
-                    selected: _selectedFoodType == entry.key,
+                    selected:
+                        _selectedFoodType == entry.key,
                     onSelected: _isSubmitting
                         ? null
                         : (selected) {
                             setState(() {
-                              _selectedFoodType = selected ? entry.key : null;
+                              _selectedFoodType =
+                                  selected ? entry.key : null;
                               _error = null;
                             });
                           },
@@ -610,13 +704,16 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 maxLength: 256,
                 decoration: const InputDecoration(
                   labelText: 'Specific location',
-                  hintText: 'Room 101, second floor lounge...',
+                  hintText:
+                      'Room 101, second floor lounge...',
                   helperText: 'Optional',
                   prefixIcon: Icon(Icons.pin_drop_outlined),
                 ),
               ),
               const SizedBox(height: 8),
-              const _FormSectionLabel('DIETARY TAGS · OPTIONAL'),
+              const _FormSectionLabel(
+                'DIETARY TAGS · OPTIONAL',
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -625,7 +722,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     .map(
                       (entry) => FilterChip(
                         label: Text(entry.value),
-                        selected: _selectedDietaryTags.contains(entry.key),
+                        selected: _selectedDietaryTags
+                            .contains(entry.key),
                         onSelected: _isSubmitting
                             ? null
                             : (selected) {
@@ -654,9 +752,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(Icons.lunch_dining_rounded),
+                    : const Icon(
+                        Icons.lunch_dining_rounded,
+                      ),
                 label: Text(
-                  _isSubmitting ? 'Posting...' : 'Post free food',
+                  _isSubmitting
+                      ? 'Posting...'
+                      : 'Post free food',
                 ),
               ),
               if (_error != null) ...[
@@ -733,7 +835,10 @@ class _PhotoAction extends StatelessWidget {
       child: IconButton(
         tooltip: tooltip,
         onPressed: onPressed,
-        icon: Icon(icon, color: AppColors.coral),
+        icon: Icon(
+          icon,
+          color: AppColors.coral,
+        ),
       ),
     );
   }
@@ -757,6 +862,7 @@ class _DashedRoundedRectPainter extends CustomPainter {
           Radius.circular(radius),
         ),
       );
+
     final paint = Paint()
       ..color = color
       ..strokeWidth = 1.6
@@ -768,18 +874,26 @@ class _DashedRoundedRectPainter extends CustomPainter {
 
     for (final metric in path.computeMetrics()) {
       var distance = 0.0;
+
       while (distance < metric.length) {
         canvas.drawPath(
-          metric.extractPath(distance, distance + dashLength),
+          metric.extractPath(
+            distance,
+            distance + dashLength,
+          ),
           paint,
         );
+
         distance += dashLength + gapLength;
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DashedRoundedRectPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.radius != radius;
+  bool shouldRepaint(
+    covariant _DashedRoundedRectPainter oldDelegate,
+  ) {
+    return oldDelegate.color != color ||
+        oldDelegate.radius != radius;
   }
 }
