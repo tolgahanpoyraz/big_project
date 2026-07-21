@@ -16,8 +16,9 @@ interface RawPost {
   _id: string;
   foodName: string;
   type: PostType;
-  dietaryTags: DietaryTag[];
-  location: PostLocation;
+  badges?: string[];
+  dietaryTags?: DietaryTag[];
+  location: string | PostLocation;
   locationDetail?: string;
   imageKey?: string;
   author: string;
@@ -34,7 +35,7 @@ function normalizePost(raw: RawPost): Post {
     id: raw._id,
     foodName: raw.foodName,
     type: raw.type,
-    dietaryTags: raw.dietaryTags,
+    dietaryTags: (raw.badges || raw.dietaryTags || []) as DietaryTag[],
     location: raw.location,
     locationDetail: raw.locationDetail,
     imageKey: raw.imageKey,
@@ -70,9 +71,13 @@ export const postService = {
     locationDetail?: string;
     imageKey?: string;
   }): Promise<{ post: Post }> {
+    const { dietaryTags, ...rest } = body;
     const data = await apiRequest<{ post: RawPost }>('/posts', {
       method: 'POST',
-      bodyData: body,
+      bodyData: {
+        ...rest,
+        badges: dietaryTags,
+      },
     });
     return { post: normalizePost(data.post) };
   },

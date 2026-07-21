@@ -45,7 +45,7 @@ export interface Post {
   foodName: string;
   type: PostType;
   dietaryTags: DietaryTag[];
-  location: PostLocation;
+  location: string | PostLocation;
   locationDetail?: string;
   imageKey?: string;
   author: string;

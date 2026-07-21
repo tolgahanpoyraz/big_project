@@ -161,8 +161,9 @@ export const FeedPage: React.FC = () => {
   const filteredPosts = posts.filter(post => {
     const query = searchQuery.toLowerCase();
     const matchesFoodName = post.foodName.toLowerCase().includes(query);
-    const matchesLocation = post.location.name.toLowerCase().includes(query);
-    const matchesTag = post.dietaryTags.some(tag => tag.toLowerCase().includes(query));
+    const locationName = typeof post.location === 'string' ? post.location : (post.location?.name || '');
+    const matchesLocation = locationName.toLowerCase().includes(query);
+    const matchesTag = (post.dietaryTags || []).some(tag => (tag || '').toLowerCase().includes(query));
     return matchesFoodName || matchesLocation || matchesTag;
   });
 
@@ -236,12 +237,12 @@ export const FeedPage: React.FC = () => {
               {/* Title & Location */}
               <div style={{ flex: 1, margin: '12px 0' }}>
                 <h3 style={foodTitleStyle}>{post.foodName}</h3>
-                <p style={locationStyle}>📍 {post.location.name}</p>
+                <p style={locationStyle}>📍 {typeof post.location === 'string' ? post.location : post.location?.name}</p>
               </div>
 
               {/* Dietary Tags */}
               <div style={tagsContainerStyle}>
-                {post.dietaryTags.map((tag, idx) => (
+                {(post.dietaryTags || []).map((tag, idx) => (
                   <span key={idx} style={tagStyle}>
                     #{tag}
                   </span>
