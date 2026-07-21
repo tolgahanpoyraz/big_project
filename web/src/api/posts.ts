@@ -55,6 +55,7 @@ export const postService = {
     const data = await apiRequest<{ posts: RawPost[] }>('/posts', {
       method: 'GET',
     });
+    console.log(data);
     return { posts: data.posts.map(normalizePost) };
   },
 
