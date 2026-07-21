@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 abstract final class AppColors {
   static const coral = Color(0xFFF0653F);
   static const coralLight = Color(0xFFF98E6E);
+  static const green = Color(0xFF2F9D63);
+  static const greenLight = Color(0xFF4FB783);
   static const appBg = Color(0xFFFFF3EC);
   static const panelBg = Color(0xFFFFF8F3);
   static const card = Color(0xFFFFFFFF);

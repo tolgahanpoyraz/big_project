@@ -38,6 +38,8 @@ dependencies:
   shared_preferences: ^2.5.5
   image_picker: ^1.2.3
   google_fonts: ^6.2.1
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +67,7 @@ flutter:
   # offline (matching filenames it expects: <Family>-<Weight>.ttf).
   assets:
     - assets/google_fonts/
+    - assets/eugene/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

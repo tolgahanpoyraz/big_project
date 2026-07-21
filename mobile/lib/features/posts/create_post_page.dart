@@ -287,7 +287,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
             : 'Could not select the photo.';
       });
     } finally {
-      _isPickingImage = false;
+      if (mounted) {
+        setState(() => _isPickingImage = false);
+      }
     }
   }
 
@@ -644,9 +646,19 @@ class _CreatePostPageState extends State<CreatePostPage> {
       );
     }
 
+    final canSubmit = !_isSubmitting &&
+        !_isPickingImage &&
+        !_isLoadingLocations &&
+        _locationsError == null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('New drop'),
+      ),
+      bottomNavigationBar: _SubmitFooter(
+        isSubmitting: _isSubmitting,
+        onCancel: _isSubmitting ? null : () => Navigator.of(context).maybePop(),
+        onSubmit: canSubmit ? _submitPost : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
@@ -745,30 +757,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     )
                     .toList(),
               ),
-              const SizedBox(height: 26),
-              FilledButton.icon(
-                onPressed: _isSubmitting ||
-                        _isPickingImage ||
-                        _isLoadingLocations ||
-                        _locationsError != null
-                    ? null
-                    : _submitPost,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.lunch_dining_rounded,
-                      ),
-                label: Text(
-                  _isSubmitting ? 'Posting...' : 'Post free food',
-                ),
-              ),
+              const SizedBox(height: 22),
+              const _ExpiryNote(),
               if (_error != null) ...[
                 const SizedBox(height: 16),
                 Container(
@@ -797,6 +787,107 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   ),
                 ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpiryNote extends StatelessWidget {
+  const _ExpiryNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      decoration: BoxDecoration(
+        color: AppColors.warnBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.warnBorder),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.schedule_rounded, size: 18, color: AppColors.warnIcon),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Expires in ~50 min',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.warnText,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  'Every "still here" vote keeps it alive longer.',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.warnIcon.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SubmitFooter extends StatelessWidget {
+  const _SubmitFooter({
+    required this.isSubmitting,
+    required this.onCancel,
+    required this.onSubmit,
+  });
+
+  final bool isSubmitting;
+  final VoidCallback? onCancel;
+  final VoidCallback? onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 14, 22, 14),
+          child: Row(
+            children: [
+              OutlinedButton(
+                onPressed: onCancel,
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: onSubmit,
+                  icon: isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.bakery_dining_rounded, size: 18),
+                  label: Text(isSubmitting ? 'Posting...' : 'Post free food'),
+                ),
+              ),
             ],
           ),
         ),
