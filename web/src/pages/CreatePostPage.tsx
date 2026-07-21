@@ -1,11 +1,10 @@
 /* web/src/pages/CreatePostPage.tsx */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postService } from '../api/posts.js';
-import { locationService } from '../api/locations.js';
 import { POST_TYPES } from '../api/types.js';
-import type { PostType, PostLocation } from '../api/types.js';
+import type { PostType } from '../api/types.js';
 
 export const CreatePostPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ export const CreatePostPage: React.FC = () => {
   const [foodName, setFoodName] = useState('');
   const [type, setType] = useState<PostType | ''>('');
   const [location, setLocation] = useState('');
-  const [locations, setLocations] = useState<PostLocation[]>([]);
   const [badgeInput, setBadgeInput] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -21,20 +19,6 @@ export const CreatePostPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
-
-  // Load the valid campus location list once, so location is a real dropdown
-  // instead of free text (the backend only accepts a fixed set of IDs).
-  useEffect(() => {
-    async function loadLocations() {
-      try {
-        const data = await locationService.getLocations();
-        setLocations(data.locations);
-      } catch (err) {
-        console.error('Failed to load locations:', err);
-      }
-    }
-    loadLocations();
-  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -182,18 +166,15 @@ export const CreatePostPage: React.FC = () => {
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Where is it located?</label>
-            <select
+            <input
+              type="text"
               className="glass-input"
+              placeholder="e.g. Student Union, Room 204"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               disabled={loading}
               required
-            >
-              <option value="" disabled>Select a location</option>
-              {locations.map((loc) => (
-                <option key={loc.id} value={loc.id}>{loc.name}</option>
-              ))}
-            </select>
+            />
           </div>
 
           <div style={formGroupStyle}>
