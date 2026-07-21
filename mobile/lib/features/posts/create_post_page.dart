@@ -140,8 +140,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return 'image/webp';
     }
 
-    if (lowerPath.endsWith('.heic') ||
-        lowerPath.endsWith('.heif')) {
+    if (lowerPath.endsWith('.heic') || lowerPath.endsWith('.heif')) {
       return 'image/heic';
     }
 
@@ -197,8 +196,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return;
     }
 
-    // Give iOS time to finish dismissing the bottom sheet before
-    // presenting the native camera or photo picker.
     await Future<void>.delayed(
       const Duration(milliseconds: 250),
     );
@@ -273,10 +270,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
         default:
           message = source == ImageSource.camera
-              ? 'Could not open the camera: '
-                  '${error.message ?? error.code}'
-              : 'Could not open the photo library: '
-                  '${error.message ?? error.code}';
+              ? 'Could not open the camera: ${error.message ?? error.code}'
+              : 'Could not open the photo library: ${error.message ?? error.code}';
       }
 
       setState(() {
@@ -351,8 +346,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     try {
       String? imageKey;
 
-      if (_selectedImage != null &&
-          _selectedImageBytes != null) {
+      if (_selectedImage != null && _selectedImageBytes != null) {
         imageKey = await PostsApi.uploadImageBytes(
           token: token,
           bytes: _selectedImageBytes!,
@@ -398,8 +392,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       if (!mounted) return;
 
       setState(() {
-        _error =
-            'Could not create the food post. Please try again.';
+        _error = 'Could not create the food post. Please try again.';
       });
     } finally {
       if (mounted) {
@@ -424,7 +417,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
               ),
             ),
             SizedBox(width: 12),
-            Text('Loading campus locations...'),
+            Expanded(
+              child: Text('Loading campus locations...'),
+            ),
           ],
         ),
       );
@@ -460,23 +455,40 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
     return DropdownButtonFormField<String>(
       initialValue: _selectedLocationId,
+      isExpanded: true,
+      menuMaxHeight: 350,
       decoration: const InputDecoration(
-        labelText: 'Choose a campus location',
+        labelText: 'Campus location',
         prefixIcon: Icon(Icons.location_on_outlined),
       ),
-      items: _locations
-          .map(
-            (location) => DropdownMenuItem<String>(
-              value: location.id,
-              child: Text(location.name),
+      selectedItemBuilder: (context) {
+        return _locations.map((location) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              location.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          )
-          .toList(),
+          );
+        }).toList();
+      },
+      items: _locations.map((location) {
+        return DropdownMenuItem<String>(
+          value: location.id,
+          child: Text(
+            location.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      }).toList(),
       onChanged: _isSubmitting
           ? null
           : (value) {
               setState(() {
                 _selectedLocationId = value;
+                _error = null;
               });
             },
       validator: (value) {
@@ -511,14 +523,16 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   tooltip: 'Change photo',
                   icon: Icons.edit_outlined,
                   onPressed:
-                      _isSubmitting ? null : _showPhotoOptions,
+                      _isSubmitting || _isPickingImage
+                          ? null
+                          : _showPhotoOptions,
                 ),
                 const SizedBox(width: 8),
                 _PhotoAction(
                   tooltip: 'Remove photo',
                   icon: Icons.delete_outline_rounded,
                   onPressed:
-                      _isSubmitting ? null : _removeImage,
+                      _isSubmitting || _isPickingImage ? null : _removeImage,
                 ),
               ],
             ),
@@ -531,7 +545,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
       button: true,
       label: 'Add a food photo',
       child: InkWell(
-        onTap: _isSubmitting ? null : _showPhotoOptions,
+        onTap:
+            _isSubmitting || _isPickingImage ? null : _showPhotoOptions,
         borderRadius: BorderRadius.circular(24),
         child: CustomPaint(
           painter: _DashedRoundedRectPainter(
@@ -608,8 +623,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   Text(
                     'Log in to share food',
                     textAlign: TextAlign.center,
-                    style:
-                        Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 10),
                   const Text(
@@ -661,8 +675,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   hintText: 'e.g. Leftover pizza — 6 boxes',
                 ),
                 validator: (value) {
-                  if (value == null ||
-                      value.trim().isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return 'Food name is required';
                   }
 
@@ -678,8 +691,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 children: _foodTypes.entries.map((entry) {
                   return ChoiceChip(
                     label: Text(entry.value),
-                    selected:
-                        _selectedFoodType == entry.key,
+                    selected: _selectedFoodType == entry.key,
                     onSelected: _isSubmitting
                         ? null
                         : (selected) {
@@ -704,8 +716,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 maxLength: 256,
                 decoration: const InputDecoration(
                   labelText: 'Specific location',
-                  hintText:
-                      'Room 101, second floor lounge...',
+                  hintText: 'Room 101, second floor lounge...',
                   helperText: 'Optional',
                   prefixIcon: Icon(Icons.pin_drop_outlined),
                 ),
@@ -722,8 +733,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     .map(
                       (entry) => FilterChip(
                         label: Text(entry.value),
-                        selected: _selectedDietaryTags
-                            .contains(entry.key),
+                        selected:
+                            _selectedDietaryTags.contains(entry.key),
                         onSelected: _isSubmitting
                             ? null
                             : (selected) {
@@ -739,6 +750,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
               const SizedBox(height: 26),
               FilledButton.icon(
                 onPressed: _isSubmitting ||
+                        _isPickingImage ||
                         _isLoadingLocations ||
                         _locationsError != null
                     ? null
@@ -756,9 +768,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         Icons.lunch_dining_rounded,
                       ),
                 label: Text(
-                  _isSubmitting
-                      ? 'Posting...'
-                      : 'Post free food',
+                  _isSubmitting ? 'Posting...' : 'Post free food',
                 ),
               ),
               if (_error != null) ...[
