@@ -95,18 +95,14 @@ export function FeedRail(props: FeedRailProps) {
         </div>
       ) : (
         <div className="feed-list cw-scroll">
-          {posts.map((post, i) => (
+          {posts.map((post) => (
             <FoodCard
               key={post._id}
               post={post}
-              variant={i === 0 ? 'hero' : 'row'}
               selected={post._id === selectedId}
-              mine={post.author === props.currentUserId}
-              voted={props.votedSet.has(post._id)}
               distanceMi={distances.get(post._id)}
               now={now}
               onSelect={() => props.onSelect(post._id)}
-              onVote={(type) => props.onVote(post._id, type)}
             />
           ))}
         </div>

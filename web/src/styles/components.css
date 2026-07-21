@@ -513,111 +513,7 @@
   outline-offset: 2px;
 }
 
-/* Hero card */
-.card-hero {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-}
-.card-hero.selected {
-  border: 2px solid var(--coral);
-}
-.card-hero .photo {
-  position: relative;
-}
-.card-hero .photo .scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0) 48%, rgba(58, 26, 18, 0.68));
-  pointer-events: none;
-}
-.card-hero .overlay-tl {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-}
-.card-hero .overlay-tr {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-}
-.pill-distance {
-  padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 9px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--coral-deep);
-}
-.pill-time-dark {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  background: rgba(58, 26, 18, 0.6);
-  backdrop-filter: blur(4px);
-  border-radius: 9px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #fff;
-}
-.card-hero .caption {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 12px;
-}
-.card-hero .caption .title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 18px;
-  color: #fff;
-  line-height: 1.1;
-}
-.card-hero .caption .sub {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-  margin-top: 3px;
-}
-.card-hero .votes {
-  display: flex;
-  background: #fff;
-}
-.vote-cell {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 44px;
-  font-weight: 600;
-  font-size: 13px;
-  background: none;
-  border: none;
-  color: var(--text-2);
-  transition: background 0.12s ease;
-}
-.vote-cell.present {
-  color: var(--fresh-text);
-}
-.vote-cell.gone {
-  color: #b09a8e;
-}
-.vote-cell:not(:disabled):hover {
-  background: #fff8f4;
-}
-.vote-cell:disabled {
-  cursor: default;
-}
-.vote-divider {
-  width: 1px;
-  background: #f0e6de;
-}
-
-/* Compact row card */
+/* Feed card (unified for hero, mine, and compact rows) */
 .card-row {
   display: flex;
   gap: 12px;
@@ -625,15 +521,22 @@
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--r-card-sm);
-  padding: 11px 12px;
+  padding: 11px;
 }
 .card-row .thumb {
-  position: relative;
-  flex: 0 0 auto;
+  flex: 0 0 64px;
+  width: 64px;
 }
 .card-row .body {
   flex: 1;
   min-width: 0;
+}
+.card-row .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
 }
 .card-row .title {
   font-family: var(--font-display);
@@ -650,55 +553,6 @@
   font-weight: 500;
   margin-top: 2px;
 }
-
-/* Compact own-drop row (Feed · Mine) */
-.card-row-mine {
-  display: block;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--r-card-sm);
-  padding: 11px;
-}
-.card-row-mine .top {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-.card-row-mine .thumb {
-  flex: 0 0 64px;
-  width: 64px;
-}
-.card-row-mine .body {
-  flex: 1;
-  min-width: 0;
-}
-.card-row-mine .head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 3px;
-}
-.card-row-mine .title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 14.5px;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.card-row-mine .sub {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-top: 2px;
-}
-.card-row-mine .mine-foot {
-  border-top: 1px solid var(--border);
-  margin-top: 11px;
-  padding-top: 9px;
-}
 .pill-time-amber {
   display: inline-flex;
   align-items: center;
@@ -707,21 +561,6 @@
   font-weight: 600;
   color: var(--warn-icon);
   white-space: nowrap;
-}
-
-/* Mine card tally footer */
-.mine-tally {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-.mine-tally .present {
-  color: var(--fresh-text);
-}
-.mine-tally .gone {
-  color: #b09a8e;
 }
 
 /* ============================================================

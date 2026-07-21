@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { TopBar } from '../features/dashboard/TopBar';
 import { FeedRail } from '../features/dashboard/FeedRail';
 import { CampusMap } from '../features/dashboard/CampusMap';
+import { MapboxMap } from '../features/dashboard/MapboxMap';
 import { DetailPanel } from '../features/dashboard/DetailPanel';
 import { PostFoodModal } from '../features/post/PostFoodModal';
 import { SettingsModal } from '../features/settings/SettingsModal';
@@ -31,6 +32,8 @@ export function DashboardPage() {
 
   const uid = user!.id;
   const mineView = filter === 'mine';
+  // Real map when a Mapbox token is configured; otherwise the keyless canvas fallback.
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
 
   // Distance (mi) from the user to each post's location, when we know where they are.
   const distances = useMemo(() => {
@@ -158,14 +161,26 @@ export function DashboardPage() {
         />
 
         <div className="map-detail">
-          <CampusMap
-            posts={filtered}
-            locations={locations}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            userCoords={coords}
-            emptyText={mineView ? 'Your drops will show up here' : 'No active spots on the map yet'}
-          />
+          {mapboxToken ? (
+            <MapboxMap
+              posts={filtered}
+              locations={locations}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              userCoords={coords}
+              emptyText={mineView ? 'Your drops will show up here' : 'No active spots on the map yet'}
+              token={mapboxToken}
+            />
+          ) : (
+            <CampusMap
+              posts={filtered}
+              locations={locations}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              userCoords={coords}
+              emptyText={mineView ? 'Your drops will show up here' : 'No active spots on the map yet'}
+            />
+          )}
           {selectedPost && (
             <DetailPanel
               post={selectedPost}

@@ -37,6 +37,7 @@ Copy `.env.example` to `.env` and adjust:
 | `VITE_API_BASE_URL` | API base. Dev: `/api` (proxied). Prod: the full API origin, e.g. `https://api.crumb.app/api`. |
 | `VITE_ASSET_BASE_URL` | Public base for uploaded images (S3/CDN). Post `imageKey` / user `avatarKey` are appended to it. Leave empty to disable remote images — cards then show a food-emoji placeholder. |
 | `API_PROXY_TARGET` | Dev-only. Where the Vite proxy sends `/api` (the API server). |
+| `VITE_MAPBOX_TOKEN` | Public Mapbox GL token (`pk.*`). When set, the dashboard shows a real campus map recolored to the Crumb palette; leave empty to fall back to the keyless stylized canvas map. Get one at [account.mapbox.com](https://account.mapbox.com/access-tokens/). |
 
 ## What's implemented
 
@@ -56,8 +57,10 @@ All 15 screens from the handoff:
 
 ### Notes & backend dependencies
 
-- **The map** is a stylized, key-free canvas (matching the reference) that projects
-  real UCF coordinates from `GET /locations`. Swap in a map SDK later if desired.
+- **The map** renders with Mapbox GL when `VITE_MAPBOX_TOKEN` is set — a real UCF
+  basemap recolored to the Crumb cream palette, with the same teardrop status pins.
+  With no token it falls back to the stylized, key-free canvas that projects real
+  coordinates from `GET /locations`, so the app still works offline/keyless.
 - **Images** upload via the API's presigned-S3 flow. If the server has no S3 bucket
   configured, uploads return 503 and the app posts without a photo (with a notice).
 - **Display name** is read-only in Settings — the API has no profile-update endpoint yet.
