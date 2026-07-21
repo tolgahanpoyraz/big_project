@@ -11,9 +11,10 @@ import {
 import * as postsApi from '../../api/posts';
 import { getLocations } from '../../api/locations';
 import { ApiError } from '../../api/client';
+import { useAuth } from '../../auth/AuthContext';
 import type { CampusLocation, CreatePostRequest, Post, VoteType } from '../../api/types';
 
-const VOTED_KEY = 'crumb.voted';
+const VOTED_KEY_PREFIX = 'crumb.voted.';
 const POLL_MS = 45000;
 
 interface FeedContextValue {
@@ -30,9 +31,9 @@ interface FeedContextValue {
 
 const FeedContext = createContext<FeedContextValue | null>(null);
 
-function loadVoted(): Set<string> {
+function loadVoted(key: string): Set<string> {
   try {
-    const raw = localStorage.getItem(VOTED_KEY);
+    const raw = localStorage.getItem(key);
     return new Set(raw ? (JSON.parse(raw) as string[]) : []);
   } catch {
     return new Set();
@@ -40,16 +41,26 @@ function loadVoted(): Set<string> {
 }
 
 export function FeedProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const votedKey = `${VOTED_KEY_PREFIX}${user?.id ?? 'anon'}`;
   const [posts, setPosts] = useState<Post[]>([]);
   const [locations, setLocations] = useState<CampusLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [voted, setVoted] = useState<Set<string>>(loadVoted);
+  const [voted, setVoted] = useState<Set<string>>(() => loadVoted(votedKey));
 
-  const persistVoted = useCallback((next: Set<string>) => {
-    setVoted(next);
-    localStorage.setItem(VOTED_KEY, JSON.stringify([...next]));
-  }, []);
+  // Re-derive the voted set when the logged-in user changes (per-account key).
+  useEffect(() => {
+    setVoted(loadVoted(votedKey));
+  }, [votedKey]);
+
+  const persistVoted = useCallback(
+    (next: Set<string>) => {
+      setVoted(next);
+      localStorage.setItem(votedKey, JSON.stringify([...next]));
+    },
+    [votedKey],
+  );
 
   const markVoted = useCallback(
     (postId: string) => {
@@ -120,9 +131,9 @@ export function FeedProvider({ children }: { children: ReactNode }) {
             : p,
         ),
       );
-      markVoted(postId);
       try {
         const res = await postsApi.vote(postId, type);
+        markVoted(postId);
         setPosts((prev) =>
           prev.map((p) =>
             p._id === postId
@@ -131,10 +142,11 @@ export function FeedProvider({ children }: { children: ReactNode }) {
           ),
         );
       } catch (err) {
-        // 409 = already voted (e.g. from another device): keep it marked, resync.
-        if (!(err instanceof ApiError && err.status === 409)) {
-          await refresh();
+        // 409 = already voted (e.g. from another device): keep it marked, resync tallies.
+        if (err instanceof ApiError && err.status === 409) {
+          markVoted(postId);
         }
+        await refresh();
         throw err;
       }
     },

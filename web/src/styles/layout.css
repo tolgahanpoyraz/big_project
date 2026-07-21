@@ -442,6 +442,12 @@
   align-items: center;
   gap: 9px;
 }
+.detail-poster .ring {
+  padding: 2px;
+  border-radius: 50%;
+  background: #ffd9c9;
+  display: inline-flex;
+}
 .detail-poster .txt {
   font-size: 12px;
   color: var(--text-2);
@@ -966,6 +972,48 @@
   padding: 40px 24px;
   overflow-y: auto;
 }
+
+/* Email-verified mobile comp: green header band overlapped by a content
+   sheet. Hidden above the phone breakpoint — see responsive.css. */
+.verified-mobile {
+  display: none;
+}
+.verified-mobile-band {
+  position: relative;
+  background: var(--grad-green);
+  padding: 40px 30px 46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.verified-mobile-band .brand-mascot {
+  margin-bottom: 0;
+}
+.verified-mobile-greeting {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  color: #fff;
+  line-height: 1.1;
+  margin-top: 12px;
+}
+.verified-mobile-sheet {
+  background: var(--panel-bg);
+  border-radius: 30px 30px 0 0;
+  margin-top: -24px;
+  padding: 34px 30px 40px;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.verified-mobile-note {
+  margin-top: 18px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
 .auth-form {
   width: 400px;
   max-width: 100%;
@@ -1032,6 +1080,14 @@
 .auth-hero-check.lg {
   width: 96px;
   height: 96px;
+}
+.auth-hero-check.md {
+  width: 84px;
+  height: 84px;
+}
+.auth-hero-check.warn {
+  background: var(--warn-bg);
+  color: var(--warn-icon);
 }
 .forgot-link {
   font-size: 12.5px;

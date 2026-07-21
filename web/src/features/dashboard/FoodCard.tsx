@@ -93,7 +93,44 @@ export function FoodCard({ post, variant, selected, mine, voted, distanceMi, now
     );
   }
 
-  // Compact row
+  // Compact row — own drops get a richer layout (design: Feed · Mine).
+  if (mine) {
+    return (
+      <div
+        className={`food-card card-row-mine ${selected ? 'selected' : ''}`}
+        role="button"
+        tabIndex={0}
+        aria-pressed={selected}
+        onClick={onSelect}
+        onKeyDown={onKey}
+        style={selected ? { borderColor: 'var(--coral)', borderWidth: 2 } : undefined}
+      >
+        <div className="top">
+          <div className="thumb">
+            <FoodPhoto imageKey={post.imageKey} type={post.type} alt={post.foodName} height={64} radius={14} />
+          </div>
+          <div className="body">
+            <div className="head">
+              <StatusBadge status={post.status} confidence={post.confidence} showPct variant="sm" />
+              <span className="pill-time-amber">
+                <Icon name="clock" size={11} stroke="var(--warn-icon)" strokeWidth={2} />
+                {left}
+              </span>
+            </div>
+            <div className="title">{post.foodName}</div>
+            <div className="sub">{[post.location.name, ago].filter(Boolean).join(' · ')}</div>
+          </div>
+        </div>
+        <div className="mine-foot">
+          <div className="mine-tally">
+            <span className="present">✓ {post.tallies.present}</span>
+            <span className="gone">✕ {post.tallies.gone}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`food-card card-row ${selected ? 'selected' : ''}`}

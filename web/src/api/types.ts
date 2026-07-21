@@ -37,6 +37,8 @@ export interface Post {
   locationDetail?: string;
   imageKey?: string;
   author: string;
+  authorName?: string;
+  authorAvatarKey?: string;
   status: PostStatus;
   confidence: number;
   tallies: Tallies;

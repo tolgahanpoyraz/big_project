@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Icon } from '../../components/Icon';
+import { getFeed } from '../../api/posts';
 
 interface BrandPanelProps {
   variant: 'coral' | 'green';
@@ -10,6 +11,7 @@ interface BrandPanelProps {
   features?: { icon: 'pin' | 'bell' | 'check'; text: string }[];
   align?: 'between' | 'center';
   mascotSize?: 'lg' | 'sm';
+  headlineSize?: number;
 }
 
 // The gradient marketing panel shared by every auth screen. Nutmeg (the mascot)
@@ -23,7 +25,26 @@ export function BrandPanel({
   features,
   align = 'center',
   mascotSize = 'lg',
+  headlineSize,
 }: BrandPanelProps) {
+  const [openSpots, setOpenSpots] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!showFoot) return;
+    let cancelled = false;
+    getFeed()
+      .then((res) => {
+        if (cancelled) return;
+        setOpenSpots(res.posts.filter((p) => p.status !== 'gone').length);
+      })
+      .catch(() => {
+        // Auth pages must render offline — silently keep the fallback copy.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showFoot]);
+
   const blobs =
     variant === 'coral' ? (
       <>
@@ -60,7 +81,9 @@ export function BrandPanel({
 
       <div style={{ position: 'relative' }}>
         {mascot}
-        <div className="brand-headline">{headline}</div>
+        <div className="brand-headline" style={headlineSize ? { fontSize: headlineSize } : undefined}>
+          {headline}
+        </div>
         {body && <div className="brand-body">{body}</div>}
 
         {features && (
@@ -77,7 +100,13 @@ export function BrandPanel({
         )}
       </div>
 
-      {showFoot && <div className="brand-foot">Built for UCF · Free food, before it's gone</div>}
+      {showFoot && (
+        <div className="brand-foot">
+          {openSpots !== null && openSpots >= 1
+            ? `Built for UCF · ${openSpots} free spots active right now`
+            : "Built for UCF · Free food, before it's gone."}
+        </div>
+      )}
     </aside>
   );
 }

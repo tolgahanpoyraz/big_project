@@ -54,6 +54,7 @@ export function ResetPasswordPage() {
     <div className="auth-screen">
       <BrandPanel
         variant="green"
+        headlineSize={32}
         headline={
           <>
             Almost there —

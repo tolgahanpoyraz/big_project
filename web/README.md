@@ -62,6 +62,10 @@ All 15 screens from the handoff:
   configured, uploads return 503 and the app posts without a photo (with a notice).
 - **Display name** is read-only in Settings — the API has no profile-update endpoint yet.
 - **Delete** removes a drop locally (posts auto-expire); there is no `DELETE /posts/:id`.
-- **Email links:** for password-reset links to land here, the API's `APP_URL` must
-  point at this web app's origin. In production, also add that origin to the API's
-  `CORS_ORIGINS`.
+- **Email links:** for verification and password-reset links to land here, the API's
+  `APP_URL` must point at this web app's origin (dev default: `http://localhost:5173`).
+  In production, also add that origin to the API's `CORS_ORIGINS`. `GET /auth/verify`
+  is opened directly from the email client, hits the API, and 302-redirects back to
+  `/email-verified` (success) or `/verify-email?error=...` (invalid/expired/missing
+  token, or a server error) — it never renders its own HTML. In dev the Vite proxy
+  forwards `/api` to the API, so a verify link built from `APP_URL` still reaches it.

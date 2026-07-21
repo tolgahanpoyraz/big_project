@@ -1,5 +1,6 @@
 import type { Post, VoteType } from '../../api/types';
 import { FoodPhoto } from '../../components/FoodPhoto';
+import { Avatar } from '../../components/Avatar';
 import { StatusBadge } from '../../components/StatusBadge';
 import { FreshnessMeter } from '../../components/FreshnessMeter';
 import { Icon } from '../../components/Icon';
@@ -46,7 +47,30 @@ export function DetailPanel({ post, mine, voted, distanceMi, now, onClose, onVot
           <StatusBadge status={post.status} />
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+        {!mine && post.authorName ? (
+          <div className="detail-poster" style={{ marginTop: 12 }}>
+            <span className="ring">
+              <Avatar name={post.authorName} avatarKey={post.authorAvatarKey} size={28} />
+            </span>
+            <div className="txt">
+              Posted by <strong>{post.authorName}</strong> · {relativeTime(post.createdAt, now)}
+            </div>
+          </div>
+        ) : (
+          !mine && (
+            <div className="detail-meta" style={{ marginTop: 12, color: 'var(--text-muted)' }}>
+              <Icon name="user" size={14} stroke="var(--text-muted)" strokeWidth={2} />
+              Posted {relativeTime(post.createdAt, now)}
+            </div>
+          )
+        )}
+
+        <div className="detail-meta" style={{ marginTop: 10 }}>
+          <Icon name="pin" size={15} stroke="#F0653F" strokeWidth={2} />
+          {locationLine}
+        </div>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
           {mine && <span className="tag tag-mine">Your drop</span>}
           <span className="tag tag-type">{typeLabel(post.type)}</span>
           {post.dietaryTags.map((t) => (
@@ -54,15 +78,6 @@ export function DetailPanel({ post, mine, voted, distanceMi, now, onClose, onVot
               {dietaryLabel(t)}
             </span>
           ))}
-        </div>
-
-        <div className="detail-meta" style={{ marginTop: 10 }}>
-          <Icon name="pin" size={15} stroke="#F0653F" strokeWidth={2} />
-          {locationLine}
-        </div>
-        <div className="detail-meta" style={{ marginTop: 8, color: 'var(--text-muted)' }}>
-          <Icon name="user" size={14} stroke="var(--text-muted)" strokeWidth={2} />
-          Posted {relativeTime(post.createdAt, now)}
         </div>
 
         <div style={{ marginTop: 16 }}>

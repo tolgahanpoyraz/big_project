@@ -27,6 +27,12 @@
 /* Phone: feed rail becomes the full first pane, map hides behind a toggle.
    The feed rail expands to fill; the map + detail overlay when a post is open. */
 @media (max-width: 680px) {
+  .verified-desktop {
+    display: none;
+  }
+  .verified-mobile {
+    display: block;
+  }
   .feed-rail {
     width: 100%;
     border-right: none;

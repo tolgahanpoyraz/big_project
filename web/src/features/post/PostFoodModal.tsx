@@ -109,7 +109,7 @@ export function PostFoodModal({ locations, userCoords, onClose, onCreate, onCrea
             flex: 1,
             minHeight: 300,
             borderRadius: 18,
-            border: preview ? 'none' : '2px dashed #f0c8b6',
+            border: 'none',
             background: preview ? 'transparent' : '#fff',
             color: 'var(--text-2)',
             display: 'flex',

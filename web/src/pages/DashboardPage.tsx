@@ -115,9 +115,20 @@ export function DashboardPage() {
           title={mineView ? 'Your drops' : 'Hot & fresh right now'}
           countLine={
             mineView ? (
-              <>
-                <span className="hi">{mineCount} live</span> {mineCount === 1 ? 'drop' : 'drops'} you posted
-              </>
+              mineCount === 0 ? (
+                'Nothing live right now'
+              ) : (
+                <>
+                  <span className="hi">{mineCount} live</span>
+                  {mineCount === 1
+                    ? ' · expires within the hour'
+                    : mineCount === 2
+                      ? ' · both expire within the hour'
+                      : ' · all expire within the hour'}
+                </>
+              )
+            ) : posts.length === 0 ? (
+              'No spots active near campus right now'
             ) : (
               <>
                 <span className="hi">{posts.length} active</span> {posts.length === 1 ? 'spot' : 'spots'} near campus

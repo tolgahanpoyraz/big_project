@@ -145,6 +145,7 @@ export function RegisterPage() {
       <BrandPanel
         variant="green"
         mascotSize="sm"
+        headlineSize={30}
         headline={
           <>
             Every meal shared
