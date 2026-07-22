@@ -6,10 +6,8 @@
   --coral-light: #f98e6e;
   --coral-deep: #c9553b;
   --coral-ink: #c15a2c;
-  /* Accessibility-adjusted coral: text links darkened to >=4.5:1 on cream,
-     button fill darkened so white body text on it clears 4.5:1. */
+  /* Accessibility-adjusted coral: text links darkened to >=4.5:1 on cream. */
   --coral-text: #b34b2f;
-  --coral-btn: #c55334;
 
   /* Surfaces */
   --app-bg: #fff3ec;

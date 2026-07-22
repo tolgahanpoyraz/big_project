@@ -39,7 +39,8 @@
   cursor: not-allowed;
 }
 .btn-primary {
-  background: var(--coral-btn);
+  background-color: var(--coral);
+  background-image: var(--grad-coral);
   color: #fff;
   box-shadow: var(--shadow-btn);
 }
@@ -86,7 +87,8 @@
   height: 42px;
   padding: 0 18px 0 14px;
   border-radius: 13px;
-  background: var(--coral-btn);
+  background-color: var(--coral);
+  background-image: var(--grad-coral);
   color: #fff;
   font-weight: 600;
   font-size: 14px;
@@ -306,7 +308,8 @@
   border-color: var(--placeholder);
 }
 .chip.active {
-  background: var(--coral-btn);
+  background-color: var(--coral);
+  background-image: var(--grad-coral);
   border-color: var(--coral);
   color: #fff;
 }
@@ -336,7 +339,8 @@
   border-color: var(--placeholder);
 }
 .pick.active {
-  background: var(--coral-btn);
+  background-color: var(--coral);
+  background-image: var(--grad-coral);
   border-color: var(--coral);
   color: #fff;
 }
