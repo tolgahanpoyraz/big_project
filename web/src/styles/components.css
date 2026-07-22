@@ -1,0 +1,646 @@
+/* Inline text link/button */
+.link {
+  color: var(--coral);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--r-input);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text);
+  background: transparent;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease,
+    background 0.12s ease;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--coral);
+  color: #fff;
+  box-shadow: var(--shadow-btn);
+}
+.btn-primary:not(:disabled):hover {
+  filter: brightness(1.04);
+}
+.btn-primary:not(:disabled):active {
+  transform: translateY(1px);
+}
+.btn-secondary {
+  background: #fff;
+  color: #7a5a4d;
+  border: 1.5px solid var(--input-border);
+}
+.btn-secondary:not(:disabled):hover {
+  border-color: var(--placeholder);
+}
+.btn-danger {
+  background: #fff;
+  color: var(--coral-ink);
+  border: 1.5px solid #f0d4c8;
+}
+.btn-danger:not(:disabled):hover {
+  background: #fff6f2;
+}
+.btn-block {
+  width: 100%;
+}
+.btn-lg {
+  height: 54px;
+  font-size: 16px;
+}
+.btn-md {
+  height: 50px;
+}
+.btn-sm {
+  height: 48px;
+  font-size: 14.5px;
+  border-radius: 13px;
+}
+
+/* Top-bar Post button */
+.btn-post {
+  height: 42px;
+  padding: 0 18px 0 14px;
+  border-radius: 13px;
+  background: var(--coral);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: var(--shadow-btn-sm);
+  gap: 7px;
+}
+.btn-post:hover {
+  filter: brightness(1.04);
+}
+
+/* ============================================================
+   Form fields
+   ============================================================ */
+.field-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--field-label);
+  margin: 0 0 7px 2px;
+}
+.field-label .muted {
+  color: #cdb7a9;
+  font-weight: 500;
+}
+.field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  background: #fff;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--r-input);
+  padding: 0 15px;
+  transition: border-color 0.13s ease;
+}
+.field.field-sm {
+  height: 50px;
+}
+.field:focus-within {
+  border-color: var(--coral);
+}
+.field.is-disabled {
+  background: var(--field-disabled-bg);
+}
+.field-icon {
+  flex: 0 0 auto;
+  color: var(--input-icon);
+  display: flex;
+}
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+}
+.field input::placeholder {
+  color: var(--placeholder);
+}
+.field .trailing {
+  flex: 0 0 auto;
+  color: var(--placeholder);
+  display: flex;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.field-static {
+  flex: 1;
+  font-size: 15px;
+  color: #9a8577;
+  font-weight: 500;
+}
+.field-error {
+  border-color: #e79b86;
+}
+
+.badge-verified {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--fresh-dot);
+  background: var(--fresh-bg);
+  border-radius: 8px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--coral-ink);
+}
+
+/* Amber banner (verify email / expiry note) */
+.banner-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 14px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: var(--r-input);
+}
+.banner-warn svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--warn-icon);
+}
+.banner-warn .b-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warn-text);
+}
+.banner-warn .b-body {
+  font-size: 12px;
+  color: var(--warn-text-2);
+  font-weight: 500;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.banner-warn .b-body .link {
+  color: var(--warn-icon);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+}
+
+/* Password strength meter */
+.strength {
+  display: flex;
+  gap: 5px;
+  margin-top: 9px;
+}
+.strength span {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: #f0e0d6;
+  transition: background 0.18s ease;
+}
+.strength-hint {
+  font-size: 11.5px;
+  color: var(--text-2);
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+/* Checkbox */
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.checkbox .box {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1.5px solid var(--input-border);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  color: #fff;
+}
+.checkbox.checked .box {
+  background: var(--coral);
+  border-color: var(--coral);
+}
+.checkbox .label {
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-weight: 500;
+  line-height: 1.4;
+  font-family: var(--font-body);
+}
+.checkbox .label .link {
+  color: var(--coral);
+  font-weight: 600;
+}
+
+/* ============================================================
+   Chips (filters + type/dietary/place)
+   ============================================================ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: var(--r-chip);
+  background: #fff;
+  border: 1px solid var(--input-border);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+.chip:hover {
+  border-color: var(--placeholder);
+}
+.chip.active {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+}
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* Type/dietary select chips in the post modal */
+.pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 14px;
+  white-space: nowrap;
+  border-radius: 15px;
+  background: #fff;
+  border: 1px solid var(--input-border);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.12s ease;
+}
+.pick:hover {
+  border-color: var(--placeholder);
+}
+.pick.active {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+}
+.pick.active-green {
+  background: var(--fresh-text);
+  border-color: var(--fresh-text);
+  color: #fff;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Info tooltip */
+.info {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  cursor: default;
+  color: #b8a89b;
+}
+.tip {
+  position: absolute;
+  top: 26px;
+  left: -8px;
+  width: 196px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+  padding: 9px 11px;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px -6px rgba(58, 26, 18, 0.55);
+  z-index: 70;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.13s ease;
+  font-family: var(--font-body);
+}
+.info:hover .tip,
+.info:focus-within .tip {
+  opacity: 1;
+}
+
+/* ============================================================
+   Status badge + tags
+   ============================================================ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.status-badge.sm {
+  padding: 2px 8px;
+  font-size: 10px;
+}
+.status-badge.sm .dot {
+  width: 6px;
+  height: 6px;
+}
+.status-badge.tilt {
+  transform: rotate(-4deg);
+  color: #fff;
+  border-radius: 10px;
+  padding: 5px 11px;
+  font-size: 11px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.tag-type {
+  background: var(--neutral-chip);
+  color: #7a5a4d;
+}
+.tag-diet {
+  background: var(--fresh-bg);
+  color: var(--fresh-text);
+}
+.tag-mine {
+  background: var(--coral-tint);
+  color: var(--coral);
+}
+
+/* ============================================================
+   Freshness meter
+   ============================================================ */
+.meter {
+  padding: 14px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.meter-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.meter-head .t {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+.meter-head .v {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.meter-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 6px;
+  background: var(--meter-gradient);
+}
+.meter-thumb {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--fresh-dot);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 3px 8px rgba(58, 42, 36, 0.25);
+  transition:
+    left 0.3s ease,
+    border-color 0.3s ease;
+}
+.meter-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--field-label);
+}
+
+/* ============================================================
+   Cards / lists
+   ============================================================ */
+.food-card {
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease;
+  cursor: pointer;
+}
+.food-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+.food-card:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
+/* Feed card (unified for hero, mine, and compact rows) */
+.card-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card-sm);
+  padding: 11px;
+}
+.card-row .thumb {
+  flex: 0 0 64px;
+  width: 64px;
+}
+.card-row .body {
+  flex: 1;
+  min-width: 0;
+}
+.card-row .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.card-row .title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-row .sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.pill-time-amber {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--warn-icon);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Avatar
+   ============================================================ */
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: #ffd9c9;
+}
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #f98e6e, #f0653f);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1;
+}
+.avatar-ring {
+  padding: 1.5px;
+  border-radius: 50%;
+  background: var(--border);
+  display: inline-flex;
+}
+.avatar-ring > .inner {
+  background: #fff;
+  border-radius: 50%;
+  padding: 2px;
+  display: inline-flex;
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast-wrap {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -14px rgba(58, 26, 18, 0.6);
+  animation: cwFadeIn 0.18s ease;
+  max-width: 420px;
+}
+.toast.error {
+  background: #5c2b2e;
+}
+.toast.success {
+  background: #226b45;
+}
+
+/* Spinner */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: cwSpin 0.7s linear infinite;
+}
+.spinner.dark {
+  border-color: rgba(74, 53, 45, 0.25);
+  border-top-color: var(--coral);
+}

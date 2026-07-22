@@ -1,0 +1,82 @@
+/* Crumb design tokens — sourced from the design handoff (crumb-web-design-reference).
+   Colors, type, spacing, radii and shadows are final; match them exactly. */
+:root {
+  /* Brand / coral */
+  --coral: #f0653f;
+  --coral-light: #f98e6e;
+  --coral-deep: #c9553b;
+  --coral-ink: #c15a2c;
+
+  /* Surfaces */
+  --app-bg: #fff3ec;
+  --panel-bg: #fff8f3;
+  --surface: #ffffff;
+  --neutral-chip: #f4ece3;
+  --coral-tint: #fff2ec;
+  --field-disabled-bg: #f6ece3;
+
+  /* Text */
+  --text: #4a352d;
+  --text-2: #a56a58;
+  --text-muted: #b98a7a;
+  --field-label: #c19585;
+  --placeholder: #c7a99e;
+  --ink: #3a2a24;
+
+  /* Lines */
+  --border: #f2e5db;
+  --input-border: #f0dcd0;
+
+  /* Input accents */
+  --input-icon: #e79b86;
+
+  /* Freshness ramp */
+  --fresh-dot: #4fb783;
+  --fresh-bg: #e7f6ee;
+  --fresh-text: #2f9d63;
+  --likely-dot: #8bc23f;
+  --likely-bg: #f1f7e4;
+  --likely-text: #5e8019;
+  --fading-dot: #e8943a;
+  --fading-bg: #fdefe0;
+  --fading-text: #b06a1c;
+  --gone-dot: #c7b8ab;
+  --gone-bg: #f4eee6;
+  --gone-text: #8a7a6c;
+  --meter-gradient: linear-gradient(90deg, #4fb783, #8bc23f 38%, #e8943a 72%, #c7b8ab);
+
+  /* Warning / expiry accent */
+  --warn-bg: #fff2e2;
+  --warn-border: #ffe0c2;
+  --warn-icon: #d98a2f;
+  --warn-text: #a8701f;
+  --warn-text-2: #c99a5e;
+
+  /* Map */
+  --map-bg: #f6ece3;
+
+  /* Radii */
+  --r-input: 14px;
+  --r-chip: 16px;
+  --r-card: 22px;
+  --r-card-sm: 18px;
+  --r-modal: 22px;
+  --r-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 14px 28px -18px rgba(196, 85, 59, 0.55);
+  --shadow-card-hover: 0 18px 32px -18px rgba(196, 85, 59, 0.55);
+  --shadow-btn: 0 14px 26px -10px rgba(240, 101, 63, 0.7);
+  --shadow-btn-sm: 0 10px 20px -8px rgba(240, 101, 63, 0.6);
+  --shadow-modal: 0 40px 80px -24px rgba(58, 26, 18, 0.6);
+  --shadow-screen: 0 30px 70px -30px rgba(58, 42, 36, 0.4);
+  --shadow-menu: 0 20px 44px -14px rgba(58, 26, 18, 0.45);
+
+  /* Fonts */
+  --font-display: 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+
+  /* Gradients for auth brand panels */
+  --grad-coral: linear-gradient(160deg, #f98e6e, #f0653f);
+  --grad-green: linear-gradient(200deg, #4fb783, #2f9d63);
+}
