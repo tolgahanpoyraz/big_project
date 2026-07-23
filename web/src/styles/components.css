@@ -716,6 +716,12 @@
   line-height: 1.35;
   text-align: center;
   animation: eugene-bubble-in 0.28s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.eugene-bubble--hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(4px) scale(0.96);
+  pointer-events: none;
 }
 .eugene-bubble::before {
   content: '';

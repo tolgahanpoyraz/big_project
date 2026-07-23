@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import munching from '../assets/eugene/munching.png';
 import waving from '../assets/eugene/waving.png';
 import winking from '../assets/eugene/winking.png';
@@ -34,11 +34,21 @@ interface EugeneCycleProps {
 export function EugeneCycle({ imgClassName, start = 'munching' }: EugeneCycleProps) {
   const startIndex = Math.max(0, MOODS.findIndex((m) => m.key === start));
   const [index, setIndex] = useState(startIndex);
+  const [bubbleVisible, setBubbleVisible] = useState(true);
   const mood = MOODS[index];
+
+  useEffect(() => {
+    setBubbleVisible(true);
+    const timer = setTimeout(() => setBubbleVisible(false), 4000);
+    return () => clearTimeout(timer);
+  }, [index]);
 
   return (
     <div className="eugene-cycle">
-      <span className="eugene-bubble" aria-live="polite">
+      <span
+        className={bubbleVisible ? 'eugene-bubble' : 'eugene-bubble eugene-bubble--hidden'}
+        aria-live="polite"
+      >
         {mood.line}
       </span>
       <button
