@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import '../../api/posts_api.dart';
 import '../../models/food_post.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/crumb_wordmark.dart';
 import '../../theme/freshness.dart';
 import '../auth/auth_session.dart';
 import 'post_detail_sheet.dart';
@@ -549,11 +550,7 @@ class _FeedPageState extends State<FeedPage> {
               color: AppColors.coral,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.bakery_dining_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
+            child: const Center(child: CrumbLogoMark()),
           ),
           const SizedBox(width: 8),
           Expanded(
